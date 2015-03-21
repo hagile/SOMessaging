@@ -24,7 +24,6 @@
 
 #import "SOMessageInputView.h"
 #import <QuartzCore/QuartzCore.h>
-#import "UINavigationController+Rotation.h"
 
 @interface SOMessageInputView() <UITextViewDelegate, UIGestureRecognizerDelegate>
 {
@@ -196,9 +195,6 @@
     
     [self addGestureRecognizer:tapGesture];
     [self.superview addGestureRecognizer:panGesture];
-    
-    UINavigationController *nc = [self navigationControllerInstance];
-    nc.cantAutorotate = NO;
 }
 
 - (void)adjustTableViewWithCurve:(BOOL)withCurve scrollsToBottom:(BOOL)scrollToBottom
@@ -405,8 +401,6 @@
         if (CGRectContainsPoint(self.frame, point)) {
             panDidEnterIntoThisView = YES;
             _viewIsDragging = YES;
-            UINavigationController *nc = [self navigationControllerInstance];
-            nc.cantAutorotate = YES;
             initialPosY = self.frame.origin.y;
             kbInitialPosY = self.keyboardView.frame.origin.y;
             [pan setTranslation:CGPointZero inView:pan.view];
@@ -430,9 +424,6 @@
         
         if (pan.state == UIGestureRecognizerStateEnded || pan.state == UIGestureRecognizerStateCancelled)
         {
-            UINavigationController *nc = [self navigationControllerInstance];
-            nc.cantAutorotate = NO;
-
             panDidEnterIntoThisView = NO;
             panDidStartetFromThisView = NO;
             _viewIsDragging = NO;
@@ -478,9 +469,6 @@
         
         if (frame.origin.y < initialPosY) {
             
-            UINavigationController *nc = [self navigationControllerInstance];
-            nc.cantAutorotate = NO;
-            
             panDidEnterIntoThisView = NO;
             _viewIsDragging = NO;
             
@@ -493,11 +481,7 @@
             }];
             
         } else if (frame.origin.y > self.superview.frame.size.height - self.frame.size.height) {
-            
-            UINavigationController *nc = [self navigationControllerInstance];
-            nc.cantAutorotate = NO;
 
-            
             panDidEnterIntoThisView = NO;
             _viewIsDragging = NO;
             
