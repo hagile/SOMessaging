@@ -24,6 +24,8 @@
 
 #import <Foundation/Foundation.h>
 #import "SOMessageType.h"
+//Need to import if added this for a project created with XCode v.6.0. and above.
+#import <UIKit/UIKit.h>
 
 @protocol SOMessage
 
