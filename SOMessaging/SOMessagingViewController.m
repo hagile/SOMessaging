@@ -113,17 +113,7 @@
     });
 }
 
-// This code will work only if this vc hasn't navigation controller
-- (BOOL)shouldAutorotate
-{
-    if (self.messageInputView.viewIsDragging) {
-        return NO;
-    }
-    return YES;
-}
-
 #pragma mark - Table view data source
-
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
     // Return the number of sections.
@@ -176,7 +166,7 @@
     NSDate *date = [firstMessageInGroup date];
     
     NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
-    [formatter setDateFormat:@"dd MMM, eee, HH:mm"];
+    [formatter setDateFormat:@"MMM dd, yyyy"];
     UILabel *label = [[UILabel alloc] init];
     label.text = [formatter stringFromDate:date];
     
@@ -291,7 +281,7 @@
 
 - (UIImage *)balloonImageForReceiving
 {
-    UIImage *bubble = [UIImage imageNamed:@"bubbleReceive.png"];
+    UIImage *bubble = [UIImage imageNamed:@"grey_bubble.png"];
     UIColor *color = [UIColor colorWithRed:210.0/255.0 green:210.0/255.0 blue:215.0/255.0 alpha:1.0];
     bubble = [self tintImage:bubble withColor:color];
     return [bubble resizableImageWithCapInsets:UIEdgeInsetsMake(17, 27, 21, 17)];
@@ -299,7 +289,7 @@
 
 - (UIImage *)balloonImageForSending
 {
-    UIImage *bubble = [UIImage imageNamed:@"bubble.png"];
+    UIImage *bubble = [UIImage imageNamed:@"blue_bubble.png"];
     UIColor *color = [UIColor colorWithRed:74.0/255.0 green:186.0/255.0 blue:251.0/255.0 alpha:1.0];
     bubble = [self tintImage:bubble withColor:color];
     return [bubble resizableImageWithCapInsets:UIEdgeInsetsMake(17, 21, 16, 27)];
