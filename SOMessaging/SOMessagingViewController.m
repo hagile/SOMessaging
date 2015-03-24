@@ -166,7 +166,7 @@
     NSDate *date = [firstMessageInGroup date];
     
     NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
-    [formatter setDateFormat:@"MMM dd, yyyy"];
+    [formatter setDateFormat:@"MMMM dd, yyyy"];
     UILabel *label = [[UILabel alloc] init];
     label.text = [formatter stringFromDate:date];
     

@@ -150,7 +150,7 @@ static BOOL cellIsDragging;
     self.contentView.clipsToBounds = NO;
     self.clipsToBounds = NO;
     
-    self.timeLabel.font = [UIFont fontWithName:@"HelveticaNeue-Light" size:12];
+    self.timeLabel.font = [UIFont fontWithName:@"HelveticaNeue-Light" size:10];
     self.timeLabel.textColor = [UIColor grayColor];
     self.timeLabel.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin;
 }
@@ -338,7 +338,7 @@ static BOOL cellIsDragging;
     
     // Adjusing time label
     NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
-    [formatter setDateFormat:@"HH:mm"];
+    [formatter setDateFormat:@"hh:mm a"];
     self.timeLabel.frame = CGRectZero;
     self.timeLabel.text = [formatter stringFromDate:self.message.date];
 
@@ -439,7 +439,7 @@ static BOOL cellIsDragging;
     
     // Adjusing time label
     NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
-    [formatter setDateFormat:@"HH:mm"];
+    [formatter setDateFormat:@"hh:mm a"];
     self.timeLabel.frame = CGRectZero;
     self.timeLabel.text = [formatter stringFromDate:self.message.date];
     
