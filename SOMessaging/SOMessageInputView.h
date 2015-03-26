@@ -28,7 +28,9 @@
 
 #define kAutoResizingMaskAll UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth
 
-@interface SOMessageInputView : UIView
+@interface SOMessageInputView : UIView {
+    int counter;
+}
 
 @property (weak, nonatomic) UITableView *tableView;
 
