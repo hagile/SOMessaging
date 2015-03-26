@@ -35,6 +35,7 @@
     BOOL keyboardHidesFromDragging;
     UITapGestureRecognizer *tapGesture;
     UIPanGestureRecognizer *panGesture;
+    CGFloat _currentKeyboardHeight;
 }
 
 @property (weak, nonatomic) UIView *keyboardView;
@@ -49,12 +50,14 @@
     if (self) {
         [self setupInitialData];
         [self setup];
+        counter = 1;
     }
     return self;
 }
 
 - (void)setupInitialData
 {
+    _currentKeyboardHeight = 0.0f;
     self.textInitialHeight = 40.0f;
     self.textMaxHeight = 130.0f;
     self.textleftMargin = 5.0f;
@@ -149,12 +152,12 @@
     CGRect txtBgFrame = self.textBgImageView.frame;
     txtBgFrame.origin = CGPointMake(self.mediaButton.frame.origin.x + self.mediaButton.frame.size.width + self.textleftMargin, self.textTopMargin);
     txtBgFrame.size = CGSizeMake(self.frame.size.width - self.mediaButton.frame.size.width - self.textleftMargin - self.sendButton.frame.size.width - self.textRightMargin, self.textInitialHeight - self.textTopMargin - self.textBottomMargin);
-
+    
     self.textBgImageView.frame = txtBgFrame;
     
     UIImage *image = [UIImage imageNamed:@"inputTextBG.png"];
     self.textBgImageView.image = [image resizableImageWithCapInsets:UIEdgeInsetsMake(13, 13, 13, 13)];
-
+    
     CGFloat topPadding = 6.0f;
     CGFloat bottomPadding = 5.0f;
     CGFloat leftPadding = 6.0f;
@@ -202,8 +205,8 @@
     UIEdgeInsets contentInsets = UIEdgeInsetsMake(self.tableView.contentInset.top, 0.0, keyboardFrame.size.height + self.frame.size.height, 0.0);
     
     NSInteger section = [(id<UITableViewDataSource>)self.delegate numberOfSectionsInTableView:self.tableView] - 1;
-     if (section == -1) {
-     	self.tableView.contentInset = contentInsets;
+    if (section == -1) {
+        self.tableView.contentInset = contentInsets;
         self.tableView.scrollIndicatorInsets = contentInsets;
         return;
     }
@@ -227,7 +230,7 @@
         }
         [UIView commitAnimations];
     } else {
-    	self.tableView.contentInset = contentInsets;
+        self.tableView.contentInset = contentInsets;
         self.tableView.scrollIndicatorInsets = contentInsets;
     }
 }
@@ -259,7 +262,7 @@
     CGRect frame = self.textView.frame;
     CGFloat delta = ceilf(usedFrame.size.height) - frame.size.height;
     
-     CGFloat lineHeight = self.textView.font.lineHeight;
+    CGFloat lineHeight = self.textView.font.lineHeight;
     int numberOfActualLines = (int)ceilf(usedFrame.size.height / lineHeight);
     
     CGFloat actualHeight = numberOfActualLines * lineHeight;
@@ -277,7 +280,7 @@
         
         [UIView animateWithDuration:0.3 animations:^{
             self.frame = frm;
-
+            
         } completion:^(BOOL finished) {
             [self scrollToCaretInTextView:self.textView animated:NO];
         }];
@@ -298,14 +301,17 @@
 #pragma mark - textview delegate
 - (void)textViewDidChange:(UITextView *)textView
 {
-    [self adjustTextViewSize];    
+    [self adjustTextViewSize];
 }
 
 #pragma mark - Notifications handlers
 - (void)handleKeyboardWillShowNote:(NSNotification *)notification
 {
+    counter++;
+    
     CGRect keyboardRect = [[notification.userInfo objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue];
     CGRect windowRect = self.window.bounds;
+    
     if (UIInterfaceOrientationIsLandscape([UIApplication sharedApplication].statusBarOrientation)) {
         keyboardRect = CGRectMake(keyboardRect.origin.x, keyboardRect.origin.y, MAX(keyboardRect.size.width,keyboardRect.size.height), MIN(keyboardRect.size.width,keyboardRect.size.height));
         windowRect = CGRectMake(windowRect.origin.x, windowRect.origin.y, MAX(windowRect.size.width,windowRect.size.height), MIN(windowRect.size.width,windowRect.size.height));
@@ -313,24 +319,40 @@
     
     keyboardFrame = keyboardRect;
     
-	UIViewAnimationCurve curve = [[notification.userInfo objectForKey:UIKeyboardAnimationCurveUserInfoKey] integerValue];
+    UIViewAnimationCurve curve = [[notification.userInfo objectForKey:UIKeyboardAnimationCurveUserInfoKey] integerValue];
     keyboardCurve = curve;
     
-	double duration = [[notification.userInfo objectForKey:UIKeyboardAnimationDurationUserInfoKey] doubleValue];
+    double duration = [[notification.userInfo objectForKey:UIKeyboardAnimationDurationUserInfoKey] doubleValue];
     keyboardDuration = duration;
-    
-    CGRect frame = self.frame;
-    // calculate the absolute ending point (based on the window rather than superview, which could be contained in a tab bar or tool bar)
-    frame.origin.y = windowRect.size.height - frame.size.height - keyboardRect.size.height;
-    initialInputViewPosYWhenKeyboardIsShown = frame.origin.y;
-    
-    [self adjustTableViewWithCurve:YES scrollsToBottom:YES];
-    
-    [UIView animateWithDuration:duration animations:^{
-        [UIView setAnimationCurve:curve];
-        self.frame = frame;
-    }];
-    
+    if (counter >= 3) {
+        counter = 1;
+        CGRect frame = self.frame;
+        CGFloat deltaHeight = keyboardRect.size.height - _currentKeyboardHeight;
+        // Write code to adjust views accordingly using deltaHeight
+        _currentKeyboardHeight = keyboardRect.size.height;
+        
+        initialInputViewPosYWhenKeyboardIsShown = frame.origin.y;
+        
+        [self adjustTableViewWithCurve:YES scrollsToBottom:YES];
+        
+        [UIView animateWithDuration:duration animations:^{
+            [UIView setAnimationCurve:curve];
+            self.frame = CGRectMake(self.frame.origin.x, keyboardRect.size.height - (deltaHeight - self.frame.size.height), self.frame.size.width, self.frame.size.height);
+        }];
+    }
+    else{
+        CGRect frame = self.frame;
+        // calculate the absolute ending point (based on the window rather than superview, which could be contained in a tab bar or tool bar)
+        frame.origin.y = windowRect.size.height - frame.size.height - keyboardRect.size.height;
+        initialInputViewPosYWhenKeyboardIsShown = frame.origin.y;
+        
+        [self adjustTableViewWithCurve:YES scrollsToBottom:YES];
+        
+        [UIView animateWithDuration:duration animations:^{
+            [UIView setAnimationCurve:curve];
+            self.frame = frame;
+        }];
+    }
     //Closing keyboard on tap
     UITapGestureRecognizer *tapGestureForTableView = [[UITapGestureRecognizer alloc] initWithTarget:self.textView action:@selector(resignFirstResponder)];
     [self.tableView addGestureRecognizer:tapGestureForTableView];
@@ -338,8 +360,10 @@
 
 - (void)handleKeyboardWillHideNote:(NSNotification *)notification
 {
-	UIViewAnimationCurve curve = [[notification.userInfo objectForKey:UIKeyboardAnimationCurveUserInfoKey] integerValue];
-	double duration = [[notification.userInfo objectForKey:UIKeyboardAnimationDurationUserInfoKey] doubleValue];
+    counter = 1;
+    
+    UIViewAnimationCurve curve = [[notification.userInfo objectForKey:UIKeyboardAnimationCurveUserInfoKey] integerValue];
+    double duration = [[notification.userInfo objectForKey:UIKeyboardAnimationDurationUserInfoKey] doubleValue];
     keyboardCurve = curve;
     keyboardDuration = duration;
     
@@ -350,12 +374,14 @@
         [UIView setAnimationCurve:curve];
         self.frame = frame;
     } completion:^(BOOL finished) {
-
+        
     }];
     
     [self adjustTableViewWithCurve:YES scrollsToBottom:!keyboardHidesFromDragging];
     
     keyboardHidesFromDragging = NO;
+    
+    _currentKeyboardHeight = 0.f;
 }
 
 - (void)handleOrientationDidChandeNote:(NSNotification *)note
@@ -396,7 +422,7 @@
     CGRect kbFrame = self.keyboardView.frame;
     
     CGPoint point = [pan locationInView:self.superview];
-
+    
     if (!panDidEnterIntoThisView) {
         if (CGRectContainsPoint(self.frame, point)) {
             panDidEnterIntoThisView = YES;
@@ -429,8 +455,8 @@
             _viewIsDragging = NO;
             
             CGPoint vel = [pan velocityInView:pan.view];
-
-         /* if (frame.origin.y < initialPosY + (self.frame.size.height + self.keyboardView.frame.size.height)/2 && NO) { */
+            
+            /* if (frame.origin.y < initialPosY + (self.frame.size.height + self.keyboardView.frame.size.height)/2 && NO) { */
             if (vel.y < 0) { // if scroll direction is up , then fully open keyboard
                 frame.origin.y   = initialPosY;
                 kbFrame.origin.y = kbInitialPosY;
@@ -454,14 +480,14 @@
                 }];
                 kbFrame.size.height = 0;
             }
-
+            
             UIEdgeInsets contentInsets = UIEdgeInsetsMake(self.tableView.contentInset.top, 0.0, kbFrame.size.height + self.frame.size.height, 0.0);
             [UIView beginAnimations:@"animKb" context:NULL];
             [UIView setAnimationDuration:keyboardDuration];
-
+            
             self.tableView.contentInset = contentInsets;
             self.tableView.scrollIndicatorInsets = contentInsets;
-
+            
             [UIView commitAnimations];
             
             return;
@@ -481,7 +507,7 @@
             }];
             
         } else if (frame.origin.y > self.superview.frame.size.height - self.frame.size.height) {
-
+            
             panDidEnterIntoThisView = NO;
             _viewIsDragging = NO;
             
@@ -523,7 +549,7 @@
     CGRect selfFrame = self.frame;
     frame.origin.y = self.superview.frame.size.height;
     selfFrame.origin.y = frame.origin.y - selfFrame.size.height;
-
+    
     __weak SOMessageInputView *weakSelf = self;
     [UIView animateWithDuration:keyboardDuration animations:^{
         weakSelf.keyboardView.frame = frame;
@@ -543,37 +569,6 @@
     [self.textView resignFirstResponder];
     
     [UIView commitAnimations];
-}
-
-#pragma mark - 
-- (UINavigationController*)navigationControllerInstance
-{
-    UINavigationController *resultNVC = nil;
-    UIViewController *vc = nil;
-    for (UIView* next = [self superview]; next; next = next.superview)
-    {
-        UIResponder* nextResponder = [next nextResponder];
-        
-        if ([nextResponder isKindOfClass:[UIViewController class]])
-        {
-            vc = (UIViewController*)nextResponder;
-            break;
-        }
-    }
-    
-    if (vc)
-    {
-        if ([vc isKindOfClass:[UINavigationController class]])
-        {
-            resultNVC = (UINavigationController *)vc;
-        }
-        else
-        {
-            resultNVC = vc.navigationController;
-        }
-    }
-    
-    return resultNVC;
 }
 
 #pragma mark - Gestures delegate
