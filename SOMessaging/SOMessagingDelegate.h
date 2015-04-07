@@ -44,4 +44,7 @@
  */
 - (void)messageInputViewDidSelectMediaButton:(SOMessageInputView *)inputView;
 
+- (void)messageInputViewWillShowKB:(SOMessageInputView *)inputView;
+- (void)messageInputViewWillHideKB:(SOMessageInputView *)inputView;
+
 @end

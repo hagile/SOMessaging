@@ -304,6 +304,20 @@
     [self adjustTextViewSize];
 }
 
+- (BOOL)textViewShouldBeginEditing:(UITextView *)textView {
+    if(self.delegate && [self.delegate respondsToSelector:@selector(messageInputViewWillShowKB:)]) {
+        [self.delegate messageInputViewWillShowKB:self];
+    }
+    return YES;
+}
+
+- (BOOL)textViewShouldEndEditing:(UITextView *)textView {
+    if(self.delegate && [self.delegate respondsToSelector:@selector(messageInputViewWillHideKB:)]) {
+        [self.delegate messageInputViewWillHideKB:self];
+    }
+    return YES;
+}
+
 #pragma mark - Notifications handlers
 - (void)handleKeyboardWillShowNote:(NSNotification *)notification
 {
